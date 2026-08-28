@@ -25,10 +25,13 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm run build
-        env:
-          # Le site est servi sous https://<compte>.github.io/<dépôt>/
-          DHPM_BASE: /${{ github.event.repository.name }}/
+      # Le site est servi sous https://<compte>.github.io/<dépôt>/ ; GITHUB_REPOSITORY
+      # vaut « compte/dépôt » quel que soit l'événement, y compris un lancement manuel.
+      - name: Construire
+        run: |
+          export DHPM_BASE="/${GITHUB_REPOSITORY#*/}/"
+          echo "Base du site : $DHPM_BASE"
+          npm run build
       # Sans routeur serveur, une URL profonde doit retomber sur index.html.
       - run: cp dist/index.html dist/404.html
       - uses: actions/upload-pages-artifact@v3
